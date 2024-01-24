@@ -1,33 +1,33 @@
-<div class="container">
+<section class="container">
   <form action="#">
     <div class="form-row">
       <div class="input-data">
         <input data-type="account-id" type="text" name="account_id" [(ngModel)]="account_id" required>
         <div class="underline"></div>
-        <label for="">Account Id</label>
+        <label for="account_id">Account Id</label>
       </div>
       <div class="input-data">
-        <input data-type="amount" type="number" name="amount" [(ngModel)]="amount" (focus)="onFocus($event)" id="amount" required>
+        <input data-type="amount" type="number" name="amount" [(ngModel)]="amount" (focus)="onFocus($event)" id="amount"
+          required>
         <div class="underline"></div>
-        <label for="">Amount</label>
+        <label for="amount">Amount</label>
       </div>
     </div>
     <div class="form-row submit-btn">
       <div class="input-data">
         <div class="inner"></div>
-        <input data-type="transaction-submit" type="submit" value="submit" (click)="addTransaction()" >
+        <input data-type="transaction-submit" type="submit" value="submit" (click)="addTransaction()">
       </div>
     </div>
   </form>
 
-  <div *ngFor="let transaction of transactions" class="transaction-container" >
-    <div data-type="transaction" [attr.data-account-id]="transaction.account_id"
-     [attr.data-amount]="transaction.amount"
-     [attr.data-balance]="transaction.current_account_balance" class="transaction-details">
+  <div *ngFor="let transaction of transactions$ | async" class="transaction-container">
+    <div data-type="transaction" [attr.data-account-id]="transaction.account_id" [attr.data-amount]="transaction.amount"
+      [attr.data-balance]="transaction.current_account_balance" class="transaction-details">
       Transferred {{transaction.amount < 0 ? transaction.amount * -1: transaction.amount}} {{" " + transaction.amount > 0 ? 'to':'from'}} account
       {{transaction.account_id}}
       <br />
       Current balance: {{transaction.current_account_balance}}
     </div>
   </div>
-</div>
+</section>
