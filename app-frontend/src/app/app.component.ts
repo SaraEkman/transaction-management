@@ -1,47 +1,60 @@
-import { Component, OnInit } from '@angular/core';
-import { DataService } from './data.service';
-import { Observable, Subject } from 'rxjs';
+import { Component, OnInit } from "@angular/core";
+import { DataService } from "./data.service";
+import { Observable } from "rxjs";
+import { Transaction } from "src/models/Transaction";
+import { map } from "rxjs/operators";
 
 @Component({
-  selector: 'app-root',
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  selector: "app-root",
+  templateUrl: "./app.component.html",
+  styleUrls: ["./app.component.css"]
 })
-
 export class AppComponent implements OnInit {
-  title = 'app-frontend';
-  transactions: any = []
+  title = "app-frontend";
+  transactions$: Observable<Transaction[]> = new Observable();
   account_id: string = "";
   amount: number = 0;
 
-  constructor(private dataService: DataService) { }
+  constructor(private dataService: DataService) {}
 
   ngOnInit() {
-    this.dataService.getTransactions().subscribe((data) => {
-      this.transactions = data;
-     this.sortTransactions();
-    });
+    this.transactions$ = this.dataService.getTransactions().pipe(
+      map((transaction: Transaction[]) => {
+        this.sortTransactions(transaction);
+        return transaction;
+      })
+    );
   }
 
   addTransaction() {
-    console.log("this.account_id",this.account_id), console.log("this.amount",this.amount);
     if (this.amount !== 0 && this.account_id !== "") {
-      this.dataService.addTransaction(this.account_id, this.amount).subscribe((data: any) => {
-        this.transactions.unshift(data);
-        this.sortTransactions();
-        this.account_id = "";
-        this.amount = 0;
-      });
+      this.dataService
+        .addTransaction(this.account_id, this.amount)
+        .subscribe(newTransaction => {
+          this.transactions$ = this.dataService.getTransactions().pipe(
+            map((transaction: Transaction[]) => {
+              this.sortTransactions(transaction);
+              return transaction;
+            })
+          );
+        });
+
+      this.account_id = "";
+      this.amount = 0;
     }
   }
 
-  private sortTransactions() {
-    this.transactions = this.transactions.sort((a:any, b:any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+  private sortTransactions(transaction: Transaction[]) {
+    return transaction.sort(
+      (a: any, b: any) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
   }
 
-   onFocus(event: any) {
-    if (event.target.value === '0') {
-      event.target.value = '';
-    }
+  onFocus(event: FocusEvent) {
+  const target = event.target as HTMLInputElement;
+  if (target && target.value === "0") {
+    target.value = "";
   }
+}
 }
