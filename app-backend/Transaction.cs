@@ -7,6 +7,48 @@ namespace app_backend
         public Guid Account_id { get; set; }
         public int Amount { get; set; }
 
+        public Transaction ProcessTransaction()
+        {
+            int balance = UpdateBalance();
+            return CreateTransaction(balance);
+        }
+
+        private int UpdateBalance()
+        {
+            var account = TransactionDatabase.Accounts.FirstOrDefault(a => a.Account_id == this.Account_id);
+
+            if (account == null)
+            {
+                account = new Account
+                {
+                    Account_id = this.Account_id,
+                    Balance = this.Amount
+                };
+                TransactionDatabase.Accounts.Add(account);
+            }
+            else
+            {
+                account.Balance += this.Amount;
+            }
+
+            return account.Balance;
+        }
+
+        private Transaction CreateTransaction(int balance)
+        {
+            var newTransaction = new Transaction
+            {
+                Transaction_id = Guid.NewGuid(),
+                Account_id = this.Account_id,
+                Amount = this.Amount,
+                Created_at = DateTime.UtcNow,
+                Current_account_balance = balance
+            };
+
+            TransactionDatabase.Transactions.Add(newTransaction);
+            return newTransaction;
+        }
+
     }
 
     public class Transaction
