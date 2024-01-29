@@ -29,7 +29,23 @@ namespace app_backend.Controllers
 
         public IActionResult Post([FromBody] TransactionRequest transaction)
         {
-            var newTransaction = transaction.ProcessTransaction();
+            var account = TransactionDatabase.Accounts.FirstOrDefault(a => a.Account_id == transaction.Account_id);
+
+            if (account == null)
+            {
+                account = new Account
+                {
+                    Account_id = transaction.Account_id,
+                    Balance = transaction.Amount
+                };
+                TransactionDatabase.Accounts.Add(account);
+            }
+            else
+            {
+                account.UpdateBalance(transaction.Amount);
+            }
+            var newTransaction = new Transaction(account.Balance, account.Account_id, transaction.Amount);
+            TransactionDatabase.Transactions.Add(newTransaction);
             return StatusCode(201, newTransaction);
         }
     }
